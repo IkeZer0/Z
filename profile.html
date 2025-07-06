@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Perfil - Z</title><style>body{font-family:Arial,sans-serif;background:#121212;color:#eee;display:flex;flex-direction:column;justify-content:center;align-items:center;height:100vh;margin:0}.container{background:#1e1e1e;padding:30px 40px;border-radius:10px;width:360px;box-shadow:0 0 15px rgba(255,0,0,.6);text-align:center}.logo{font-size:72px;font-weight:700;color:red;margin-bottom:20px}button{background:red;border:none;padding:12px 20px;color:#fff;font-weight:700;border-radius:5px;cursor:pointer;margin-top:20px}button:hover{background:#c00}</style></head><body><div class="container"><div class="logo">Z</div><h2>Bem-vindo(a),<span id="userName">...</span>!</h2><p>Email:<span id="userEmail">...</span></p><button id="logoutBtn">Sair</button></div><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js"></script><script>const firebaseConfig = {
+      apiKey: "AIzaSyDOJOnskmR8AEel0DS6gzDaNJoketFKVN4",
+      authDomain: "z-project-5529e.firebaseapp.com",
+      projectId: "z-project-5529e",
+      storageBucket: "z-project-5529e.firebasestorage.app",
+      messagingSenderId: "969740295477",
+      appId: "1:969740295477:web:1c523a10b8d4e21def807c",
+      measurementId: "G-LZVEV5TEL7"
+    };
+
+    const app = firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const analytics = firebase.analytics();
+
+    const userNameSpan = document.getElementById("userName");
+    const userEmailSpan = document.getElementById("userEmail");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    auth.onAuthStateChanged(user => {
+      if (user) {
+        userNameSpan.textContent = user.displayName || "Usuário";
+        userEmailSpan.textContent = user.email;
+      } else {
+        window.location.href = "index.html";
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      auth.signOut().then(() => {
+        window.location.href = "index.html";
+      });
+    });</script></body></html>
