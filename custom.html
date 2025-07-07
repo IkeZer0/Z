@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Customização de Perfil</title><style>
+*{box-sizing:border-box;}body{margin:0;padding:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;color:#fff;background:var(--theme-bg,linear-gradient(to bottom right,#1a1a2e,#0f0f1a));transition:background 0.5s ease;}
+body::before{content:"";position:absolute;width:100%;height:100%;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,0.03),rgba(255,255,255,0.03) 10px,transparent 10px,transparent 20px);pointer-events:none;z-index:0;}
+.container{max-width:720px;margin:50px auto;padding:30px;background:rgba(0,0,0,0.85);border-radius:20px;box-shadow:0 0 35px rgba(255,255,255,0.2);position:relative;z-index:1;}
+h1{text-align:center;font-size:2.6em;margin-bottom:25px;text-shadow:0 0 12px rgba(255,255,255,0.4);} 
+.profile-pic-area{width:160px;height:160px;border-radius:50%;margin:0 auto 20px;background-color:#222;background-size:cover;background-position:center;box-shadow:0 0 12px #fff;border:4px solid #fff;}
+.upload-label{display:block;margin:12px auto;text-align:center;background:#555;padding:10px 14px;border-radius:10px;width:fit-content;font-weight:bold;cursor:pointer;box-shadow:0 0 10px #aaa;}
+.upload-label:hover{background:#777;}input[type="file"]{display:none;}.form-group{margin:18px 0;}
+label{display:block;margin-bottom:6px;font-size:1.1em;}input,select{width:100%;padding:12px;border:none;border-radius:8px;background:#2d2d2d;color:#fff;font-size:1em;box-shadow:inset 0 0 8px #000;}
+.btn-save{width:100%;padding:15px;margin-top:30px;font-size:1.1em;font-weight:bold;background:#00c6ff;color:#fff;border:none;border-radius:10px;cursor:pointer;box-shadow:0 0 15px #00c6ff;}
+.btn-save:hover{background:#009acc;}.footer-note{text-align:center;color:#ccc;opacity:0.7;margin-top:30px;font-size:0.9em;}
+</style></head><body id="body"><div class="container">
+<h1>Customizar Perfil</h1>
+<div class="profile-pic-area" id="avatarPreview" style="background-image:url('https://i.imgur.com/H5QhYzS.png');"></div>
+<label class="upload-label" for="avatarInput">Escolher Foto da Galeria</label>
+<input type="file" id="avatarInput" accept="image/*" />
+<div class="form-group"><label for="username">Nome de Usuário:</label><input type="text" id="username" placeholder="Ex: Z_Mestre" /></div>
+<div class="form-group"><label for="bio">Bio:</label><input type="text" id="bio" placeholder="Fale algo sobre você..." /></div>
+<div class="form-group"><label for="theme">Cor do Tema:</label><select id="theme" onchange="updateTheme()">
+<option value="linear-gradient(to bottom right, #ff1a1a, #660000)">Vermelho</option>
+<option value="linear-gradient(to bottom right, #0066ff, #001f4d)">Azul</option>
+<option value="linear-gradient(to bottom right, #00cc66, #003322)">Verde</option>
+<option value="linear-gradient(to bottom right, #ffff33, #666600)">Amarelo</option>
+<option value="linear-gradient(to bottom right, #9933ff, #330066)">Roxo</option>
+</select></div>
+<button class="btn-save" onclick="saveProfile()">Salvar Alterações</button>
+<div class="footer-note">Seu perfil é a sua identidade. Capriche!</div></div>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyDOJOnskmR8AEel0DS6gzDaNJoketFKVN4",
+  authDomain: "z-project-5529e.firebaseapp.com",
+  projectId: "z-project-5529e",
+  storageBucket: "z-project-5529e.appspot.com",
+  messagingSenderId: "969740295477",
+  appId: "1:969740295477:web:1c523a10b8d4e21def807c",
+  measurementId: "G-LZVEV5TEL7",
+  databaseURL: "https://z-project-5529e-default-rtdb.firebaseio.com"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const usernameInput = document.getElementById("username");
+const bioInput = document.getElementById("bio");
+const themeInput = document.getElementById("theme");
+const avatarPreview = document.getElementById("avatarPreview");
+
+document.getElementById("avatarInput").addEventListener("change", function () {
+  const file = this.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      avatarPreview.style.backgroundImage = `url('${e.target.result}')`;
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+window.updateTheme = function () {
+  const color = themeInput.value;
+  document.getElementById("body").style.setProperty('--theme-bg', color);
+};
+
+window.saveProfile = async function () {
+  const username = usernameInput.value.trim();
+  const bio = bioInput.value;
+  const theme = themeInput.value;
+  const avatar = avatarPreview.style.backgroundImage;
+  const avatarUrl = avatar.slice(5, -2);
+  if (!username) { alert("Insira um nome de usuário para salvar."); return; }
+  await set(ref(db, 'users/' + username), { username, bio, theme, avatar: avatarUrl });
+  showSuccessMessage();
+};
+
+window.showSuccessMessage = function () {
+  const msg = document.createElement("div");
+  msg.innerText = "🎉 Perfil salvo com sucesso!";
+  msg.style.position = "fixed"; msg.style.top = "50%"; msg.style.left = "50%";
+  msg.style.transform = "translate(-50%, -50%)"; msg.style.padding = "20px 40px";
+  msg.style.background = "#222"; msg.style.color = "#fff";
+  msg.style.border = "2px solid #00ff88"; msg.style.borderRadius = "15px";
+  msg.style.fontSize = "1.2em"; msg.style.boxShadow = "0 0 20px #00ff88";
+  msg.style.zIndex = "9999"; document.body.appendChild(msg);
+  setTimeout(() => { msg.style.opacity = "0"; setTimeout(() => msg.remove(), 1000); }, 2500);
+};
+
+usernameInput.addEventListener("blur", async () => {
+  const username = usernameInput.value.trim();
+  if (!username) return;
+  const snapshot = await get(child(ref(db), `users/${username}`));
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    bioInput.value = data.bio || "";
+    themeInput.value = data.theme || "";
+    document.getElementById("body").style.setProperty('--theme-bg', data.theme);
+    avatarPreview.style.backgroundImage = `url('${data.avatar}')`;
+  }
+});
+window.onload = () => { updateTheme(); };
+</script></body></html>
